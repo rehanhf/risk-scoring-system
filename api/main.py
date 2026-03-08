@@ -6,20 +6,20 @@ import numpy as np
 from contextlib import asynccontextmanager
 from api.schema import CreditApplication
 
-# Globals for memory persistence
+# globals for memory persistence
 preprocessor = None
 model = None
-OPTIMAL_THRESHOLD = 0.28  # Derived from Phase 4
+OPTIMAL_THRESHOLD = 0.28
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global preprocessor, model
-    # Load strictly isolated serialized artifacts
+    # load strictly isolated serialized artifacts
     preprocessor = joblib.load("data/processed/preprocessor.joblib")
     model = lgb.Booster(model_file="src/models/lgbm_baseline.txt")
     yield
-    # Cleanup on shutdown
+    # cleanup pas shutdown
 
 
 app = FastAPI(lifespan=lifespan, title="Credit Risk Scoring Engine")
@@ -29,7 +29,7 @@ app = FastAPI(lifespan=lifespan, title="Credit Risk Scoring Engine")
 def predict_risk(app_data: CreditApplication):
     global preprocessor, model
 
-    # Strict type guard preventing NoneType execution
+    # strict type guard prevensi NoneType execution
     if preprocessor is None or model is None:
         raise HTTPException(
             status_code=503, detail="Models not fully loaded into memory."
@@ -39,7 +39,7 @@ def predict_risk(app_data: CreditApplication):
         df = pd.DataFrame([app_data.model_dump()])
         X_processed = preprocessor.transform(df)
 
-        # Explicitly cast prediction to numpy array to satisfy index type constraints
+        # cast explicitly prediksi ke numpy array agar memenuhi index type constraints
         preds = np.array(model.predict(X_processed))
         prob = float(preds[0])
 

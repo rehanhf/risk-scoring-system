@@ -23,33 +23,33 @@ def train_neural_network(
     X_train, y_train = apply_pipeline(train_path, pipeline_path)
     X_val, y_val = apply_pipeline(val_path, pipeline_path)
 
-    # Insert strict type guard:
+    # insert strict type guard:
     if y_train is None or y_val is None:
         raise ValueError("Targets missing from training or validation data.")
 
-    # 2. Convert to Tensors
+    # 2.convert ke tensors
     X_train_t = torch.FloatTensor(X_train)
     y_train_t = torch.FloatTensor(y_train.to_numpy()).unsqueeze(1)
     X_val_t = torch.FloatTensor(X_val)
 
-    # 3. Create DataLoaders
+    # 3. buat DataLoaders
     train_loader = DataLoader(
         TensorDataset(X_train_t, y_train_t), batch_size=256, shuffle=True
     )
 
-    # 4. Imbalance Handling
+    # 4.imbalance handling
     neg_count = (y_train == 0).sum()
     pos_count = (y_train == 1).sum()
     pos_weight = torch.tensor([neg_count / pos_count], dtype=torch.float32)
     print(f"Neural Network pos_weight: {pos_weight.item():.2f}")
 
-    # 5. Initialization
+    # 5. inisialisasi
     input_dim = X_train.shape[1]
     model = CreditRiskMLP(input_dim)
     criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
 
-    # 6. Training Loop
+    # 6. loop training
     epochs = 20
     for epoch in range(epochs):
         model.train()
@@ -62,7 +62,7 @@ def train_neural_network(
             optimizer.step()
             total_loss += loss.item()
 
-    # 7. Validation Evaluation
+    # 7. validasi evaluasi
     model.eval()
     with torch.no_grad():
         val_logits = model(X_val_t)

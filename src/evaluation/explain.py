@@ -13,24 +13,24 @@ from src.features.preprocess import apply_pipeline
 def generate_explanations(
     test_path: str, pipeline_path: str, model_path: str, output_dir: str
 ) -> None:
-    # 1. Load Artifacts
+    # 1. load Artifacts
     X_test, y_test = apply_pipeline(test_path, pipeline_path)
     preprocessor = joblib.load(pipeline_path)
     model = lgb.Booster(model_file=model_path)
 
-    # 2. Extract Feature Names
-    # Preprocessor must provide the exact expanded column names (e.g., OHE categories)
+    # 2.extract feature names
+    # preprocessor harus menyediakan nama kolom yang telah dikembangkan (misalnya, OHE categories).
     feature_names = preprocessor.get_feature_names_out()
 
     # 3. Initialize TreeExplainer
     explainer = shap.TreeExplainer(model)
 
-    # Sample 1000 instances to prevent computational bottleneck during global analysis
+    # sample 1000 instances untuk mencegah bottleneck komputasi saat analisis globally
     X_sample = X_test[:1000]
     shap_values = explainer.shap_values(X_sample)
 
-    # LightGBM binary classification returns a list of shap_values for some versions, or an array.
-    # Extract the array corresponding to the positive class (Default)
+    # LightGBM binary klassifikasi returns list dari shap_values untuk beberapa versi, atau array.
+    # extract array yang berkaitan dengan positive class (default)
     if isinstance(shap_values, list):
         shap_values_pos = shap_values[1]
     else:
@@ -38,7 +38,7 @@ def generate_explanations(
 
     os.makedirs(output_dir, exist_ok=True)
 
-    # 4. Global Explanation: Summary Plot
+    # 4. global explanation: summary plot
     plt.figure()
     shap.summary_plot(
         shap_values_pos, X_sample, feature_names=feature_names, show=False
@@ -46,8 +46,8 @@ def generate_explanations(
     plt.savefig(f"{output_dir}/shap_summary.png", bbox_inches="tight")
     plt.close()
 
-    # 5. Local Explanation: Single High-Risk Application
-    # Find an instance predicted as high risk
+    # 5. local explanation: single high-risk application
+    # cari instance yang ter prediksi as high risk
     preds = np.array(model.predict(X_sample))
     high_risk_idx = int(np.argmax(preds))
     high_risk_prob = preds[high_risk_idx]
@@ -56,7 +56,7 @@ def generate_explanations(
         f"Analyzing High-Risk Applicant Index {high_risk_idx} (Probability: {high_risk_prob:.4f})"
     )
 
-    # Force plot for the specific applicant
+    # force plot untuk yang specific applicant
     plt.figure()
     shap.force_plot(
         explainer.expected_value[1]

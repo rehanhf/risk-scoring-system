@@ -10,7 +10,7 @@ from src.features.preprocess import apply_pipeline
 def optimize_threshold(
     val_path: str, pipeline_path: str, model_path: str, c_fp: float, c_fn: float
 ) -> None:
-    # 1. Load Data and Model
+    # 1. load Data and model
     X_val, y_val = apply_pipeline(val_path, pipeline_path)
 
     if y_val is None:
@@ -19,10 +19,10 @@ def optimize_threshold(
 
     model = lgb.Booster(model_file=model_path)
 
-    # 2. Predict Probabilities
+    # 2. prediksi probabilitas
     y_prob = model.predict(X_val)
 
-    # 3. Simulate Economic Cost across Thresholds
+    # 3. simulasi economic cost across thresholds
     thresholds = np.linspace(0.01, 0.99, 99)
     costs = []
 
@@ -35,7 +35,7 @@ def optimize_threshold(
         total_cost = (fp * c_fp) + (fn * c_fn)
         costs.append(total_cost)
 
-    # 4. Identify Optimal Threshold
+    # 4. identifikasi threshold optimal
     min_cost_idx = np.argmin(costs)
     opt_threshold = thresholds[min_cost_idx]
     min_cost = costs[min_cost_idx]
@@ -43,7 +43,7 @@ def optimize_threshold(
     print(f"Optimal Threshold: {opt_threshold:.2f}")
     print(f"Minimum Expected Validation Cost: ${min_cost:,.2f}")
 
-    # Baseline Cost (Approve Everyone -> threshold = 1.0 -> All defaults become FN)
+    # baseline cost (approve everyone -> threshold = 1.0 -> All defaults jadi FN)
     baseline_fn = np.sum(y_val_arr == 1)
     baseline_cost = baseline_fn * c_fn
     print(f"Baseline Cost (Approve All): ${baseline_cost:,.2f}")

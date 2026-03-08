@@ -3,14 +3,14 @@ import pandas as pd
 
 
 def calculate_psi(expected: pd.Series, actual: pd.Series, bins: int = 10) -> float:
-    # 1. Define static bin boundaries based strictly on the expected (Train) distribution
+    # 1. define static bin boundaries berdasarkan bins, pada distribusi (Train) yang diharapkan
     breakpoints = np.histogram_bin_edges(expected, bins=bins)
 
-    # 2. Calculate proportions in each bin
+    # 2. kalkulasi proportions di setiap bin
     expected_percents = np.histogram(expected, bins=breakpoints)[0] / len(expected)
     actual_percents = np.histogram(actual, bins=breakpoints)[0] / len(actual)
 
-    # 3. Prevent division by zero mathematically
+    # 3. mencegah pembagian nol mathematically
     expected_percents = np.where(expected_percents == 0, 0.0001, expected_percents)
     actual_percents = np.where(actual_percents == 0, 0.0001, actual_percents)
 
@@ -27,11 +27,11 @@ def simulate_drift(train_path: str, test_path: str):
 
     feature = "LIMIT_BAL"
 
-    # Scenario A: Normal out-of-time data (No Drift)
+    # skenario a: normal out-of-time data (No Drift)
     psi_normal = calculate_psi(train[feature], test[feature])
 
-    # Scenario B: Macroeconomic shock (Drift)
-    # Simulate a recession where bank drastically cuts credit limits
+    # skenario b: macroeconomic shock (Drift)
+    # semulasi resesi dimana bank memotong credit limits drastically
     test_drifted = test.copy()
     test_drifted[feature] = test_drifted[feature] * 0.3
 
