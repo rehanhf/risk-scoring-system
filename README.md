@@ -61,7 +61,7 @@ To visualize how a loan officer interacts with the system:
     *   Input a "Risky" profile: History of late payments (PAY > 1), zero payment amounts.
     *   The API calculates a high probability ($\ge 0.28$).
     *   **Result**: `REJECT`.
-    ![DEMO](/demo/image.png)
+    ![DEMO](demo/image.png)
 
 ---
 
